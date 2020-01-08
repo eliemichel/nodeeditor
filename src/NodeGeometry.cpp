@@ -26,6 +26,7 @@ NodeGeometry(std::unique_ptr<NodeDataModel> const &dataModel)
   , _entryHeight(20)
   , _spacing(20)
   , _hovered(false)
+  , _validationHovered(false)
   , _nSources(dataModel->nPorts(PortType::Out))
   , _nSinks(dataModel->nPorts(PortType::In))
   , _draggingPos(-1000, -1000)
@@ -180,7 +181,6 @@ recalculateSize() const
 		_height = std::max(_height, static_cast<unsigned>(w->height()));
 	}
 	_height += captionHeight();
-	_height += validationHeight();
 }
 
 
@@ -420,6 +420,18 @@ validationWidth() const
   return _boldFontMetrics.boundingRect(msg).width();
 }
 
+QRect
+NodeGeometry::
+validationRect() const
+{
+	auto const &nodeStyle = StyleCollection::nodeStyle();
+	float diam = nodeStyle.ConnectionPointDiameter;
+	QSize size(diam, height() - diam);
+	return QRect(
+		QPoint(-diam / 2 - size.width(), (height() - size.height()) / 2),
+		size
+	);
+}
 
 QPointF
 NodeGeometry::

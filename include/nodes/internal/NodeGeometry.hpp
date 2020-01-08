@@ -58,6 +58,12 @@ public:
   void
   setHovered(unsigned int h) { _hovered = h; }
 
+  bool
+  validationHovered() const { return _validationHovered; }
+
+  void
+  setValidationHovered(unsigned int h) { _validationHovered = h; }
+
   unsigned int
   nSources() const;
 
@@ -126,6 +132,9 @@ public:
 
   unsigned int
   validationWidth() const;
+
+  QRect
+  validationRect() const;
   
   static 
   QPointF 
@@ -159,6 +168,7 @@ private:
   unsigned int _spacing;
 
   bool _hovered;
+  bool _validationHovered;
 
   // TODO: Do we really need to keep these? The information can be accessed any
   // time through _dataModel and is used only on geometry update. If we remove

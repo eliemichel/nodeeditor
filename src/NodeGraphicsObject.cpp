@@ -301,28 +301,28 @@ mouseMoveEvent(QGraphicsSceneMouseEvent * event)
 
       oldSize += QSize(diff.x(), diff.y());
 
-      w->setFixedSize(oldSize);
+w->setFixedSize(oldSize);
 
-      _proxyWidget->setMinimumSize(oldSize);
-      _proxyWidget->setMaximumSize(oldSize);
-      _proxyWidget->setPos(geom.widgetPosition());
+_proxyWidget->setMinimumSize(oldSize);
+_proxyWidget->setMaximumSize(oldSize);
+_proxyWidget->setPos(geom.widgetPosition());
 
-      geom.recalculateSize();
-      update();
+geom.recalculateSize();
+update();
 
-      moveConnections();
+moveConnections();
 
-      event->accept();
-    }
+event->accept();
+	}
   }
   else
   {
-    QGraphicsObject::mouseMoveEvent(event);
+	  QGraphicsObject::mouseMoveEvent(event);
 
-    if (event->lastPos() != event->pos())
-      moveConnections();
+	  if (event->lastPos() != event->pos())
+		  moveConnections();
 
-    event->ignore();
+	  event->ignore();
   }
 
   QRectF r = scene()->sceneRect();
@@ -337,14 +337,14 @@ void
 NodeGraphicsObject::
 mouseReleaseEvent(QGraphicsSceneMouseEvent* event)
 {
-  auto & state = _node.nodeState();
+	auto & state = _node.nodeState();
 
-  state.setResizing(false);
+	state.setResizing(false);
 
-  QGraphicsObject::mouseReleaseEvent(event);
+	QGraphicsObject::mouseReleaseEvent(event);
 
-  // position connections precisely after fast node move
-  moveConnections();
+	// position connections precisely after fast node move
+	moveConnections();
 }
 
 
@@ -352,24 +352,24 @@ void
 NodeGraphicsObject::
 hoverEnterEvent(QGraphicsSceneHoverEvent * event)
 {
-  // bring all the colliding nodes to background
-  QList<QGraphicsItem *> overlapItems = collidingItems();
+	// bring all the colliding nodes to background
+	QList<QGraphicsItem *> overlapItems = collidingItems();
 
-  for (QGraphicsItem *item : overlapItems)
-  {
-    if (item->zValue() > 0.0)
-    {
-      item->setZValue(0.0);
-    }
-  }
+	for (QGraphicsItem *item : overlapItems)
+	{
+		if (item->zValue() > 0.0)
+		{
+			item->setZValue(0.0);
+		}
+	}
 
-  // bring this node forward
-  setZValue(1.0);
+	// bring this node forward
+	setZValue(1.0);
 
-  _node.nodeGeometry().setHovered(true);
-  update();
-  _scene.nodeHovered(node(), event->screenPos());
-  event->accept();
+	_node.nodeGeometry().setHovered(true);
+	update();
+	_scene.nodeHovered(node(), event->screenPos());
+	event->accept();
 }
 
 
@@ -377,10 +377,10 @@ void
 NodeGraphicsObject::
 hoverLeaveEvent(QGraphicsSceneHoverEvent * event)
 {
-  _node.nodeGeometry().setHovered(false);
-  update();
-  _scene.nodeHoverLeft(node());
-  event->accept();
+	_node.nodeGeometry().setHovered(false);
+	update();
+	_scene.nodeHoverLeft(node());
+	event->accept();
 }
 
 
@@ -388,18 +388,24 @@ void
 NodeGraphicsObject::
 hoverMoveEvent(QGraphicsSceneHoverEvent * event)
 {
-  auto pos    = event->pos();
-  auto & geom = _node.nodeGeometry();
+	auto pos = event->pos();
+	auto & geom = _node.nodeGeometry();
 
-  if (_node.nodeDataModel()->resizable() &&
-      geom.resizeRect().contains(QPoint(pos.x(), pos.y())))
-  {
-    setCursor(QCursor(Qt::SizeFDiagCursor));
-  }
-  else
-  {
-    setCursor(QCursor());
-  }
+	if (_node.nodeDataModel()->resizable() &&
+		geom.resizeRect().contains(QPoint(pos.x(), pos.y())))
+	{
+		setCursor(QCursor(Qt::SizeFDiagCursor));
+	}
+	else
+	{
+		setCursor(QCursor());
+	}
+
+	bool hovered = geom.validationRect().contains(QPoint(pos.x(), pos.y()));
+	if (hovered != geom.validationHovered()) {
+		geom.setValidationHovered(hovered);
+		update();
+	}
 
   event->accept();
 }

@@ -369,15 +369,14 @@ drawValidationRect(QPainter * painter,
                  ? nodeStyle.SelectedBoundaryColor
                  : nodeStyle.NormalBoundaryColor;
 
-    if (geom.hovered())
-    {
-      QPen p(color, nodeStyle.HoveredPenWidth);
-      painter->setPen(p);
-    }
+	if (nodeStyle.UseLegacyStyle)
+	{
+		QPen p(color, geom.hovered() ? nodeStyle.HoveredPenWidth : nodeStyle.PenWidth);
+		painter->setPen(p);
+	}
     else
     {
-      QPen p(color, nodeStyle.PenWidth);
-      painter->setPen(p);
+		painter->setPen(Qt::NoPen);
     }
 
     //Drawing the validation message background
@@ -394,14 +393,16 @@ drawValidationRect(QPainter * painter,
 
     float diam = nodeStyle.ConnectionPointDiameter;
 
-    QRectF boundary(-diam,
-                    -diam + geom.height() - geom.validationHeight(),
-                    2.0 * diam + geom.width(),
-                    2.0 * diam + geom.validationHeight());
+	if (nodeStyle.UseLegacyStyle) {
+		QRectF boundary(-diam,
+			-diam + geom.height() - geom.validationHeight(),
+			2.0 * diam + geom.width(),
+			2.0 * diam + geom.validationHeight());
 
-    painter->drawRoundedRect(boundary, radius, radius);
-
-    painter->setBrush(Qt::gray);
+		painter->drawRoundedRect(boundary, radius, radius);
+	} else {
+		painter->drawRoundedRect(geom.validationRect(), radius, radius);
+	}
 
     //Drawing the validation message itself
     QString const &errorMsg = model->validationMessage();
@@ -412,11 +413,26 @@ drawValidationRect(QPainter * painter,
 
     auto rect = metrics.boundingRect(errorMsg);
 
-    QPointF position((geom.width() - rect.width()) / 2.0,
-                     geom.height() - (geom.validationHeight() - diam) / 2.0);
+	if (nodeStyle.UseLegacyStyle) {
+		QPointF position ((geom.width() - rect.width()) / 2.0,
+			geom.height() - (geom.validationHeight() - diam) / 2.0);
 
-    painter->setFont(f);
-    painter->setPen(nodeStyle.FontColor);
-    painter->drawText(position, errorMsg);
+		painter->setFont(f);
+		painter->setPen(nodeStyle.FontColor);
+		painter->setBrush(Qt::gray);
+		painter->drawText(position, errorMsg);
+	} else {
+		if (geom.validationHovered()) {
+			QPoint c = geom.validationRect().center();
+			QRect area = QRect(c.x(), c.y(), rect.width() + 10, geom.height());
+			painter->drawRect(area);
+
+			QRect textArea = QRect(area.left() + 5, area.top() + 5, area.width() - 10, area.height() - 10);
+			painter->setFont(f);
+			painter->setPen(nodeStyle.FontColor);
+			painter->setBrush(Qt::gray);
+			painter->drawText(textArea, Qt::AlignLeft | Qt::AlignVCenter, errorMsg);
+		}
+	}
   }
 }
