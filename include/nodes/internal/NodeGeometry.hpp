@@ -83,6 +83,12 @@ public:
   QRectF
   boundingRect() const;
 
+  QPainterPath
+  shape() const;
+
+  void
+  legacyRecalculateSize() const;
+
   /// Updates size unconditionally
   void
   recalculateSize() const;
@@ -91,11 +97,13 @@ public:
   void
   recalculateSize(QFont const &font) const;
 
-  // TODO removed default QTransform()
+  QPointF
+  legacyPortScenePosition(PortIndex index,
+		  PortType portType) const;
+
   QPointF
   portScenePosition(PortIndex index,
-                    PortType portType,
-                    QTransform const & t = QTransform()) const;
+                    PortType portType) const;
 
   PortIndex
   checkHitScenePoint(PortType portType,

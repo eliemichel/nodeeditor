@@ -50,6 +50,12 @@ public:
   float HoveredPenWidth;
 
   float ConnectionPointDiameter;
+  float ConnectionPointMinimumSpacing;
+  float ConnectionPointMargin;
+
+  float NameLeftMargin;
+
+  bool UseLegacyStyle; // Use original style from upstream NodeEditor library
 
   float Opacity;
 };

@@ -109,9 +109,9 @@ move()
       auto const &nodeGeom = node->nodeGeometry();
 
       QPointF scenePos =
+	    nodeGraphics.sceneTransform().map(
         nodeGeom.portScenePosition(_connection.getPortIndex(portType),
-                                   portType,
-                                   nodeGraphics.sceneTransform());
+                                   portType));
 
       QTransform sceneTransform = this->sceneTransform();
 

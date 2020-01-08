@@ -131,6 +131,14 @@ boundingRect() const
 }
 
 
+QPainterPath
+NodeGraphicsObject::
+shape() const
+{
+  return _node.nodeGeometry().shape();
+}
+
+
 void
 NodeGraphicsObject::
 setGeometryChanged()

@@ -193,9 +193,8 @@ setGraphicsObject(std::unique_ptr<ConnectionGraphicsObject>&& graphics)
     QTransform nodeSceneTransform =
       node->nodeGraphicsObject().sceneTransform();
 
-    QPointF pos = node->nodeGeometry().portScenePosition(attachedPortIndex,
-                                                         attachedPort,
-                                                         nodeSceneTransform);
+    QPointF pos = nodeSceneTransform.map(
+	  node->nodeGeometry().portScenePosition(attachedPortIndex, attachedPort));
 
     _connectionGraphicsObject->setPos(pos);
   }

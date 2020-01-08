@@ -31,6 +31,9 @@ public:
   boundingRect() const;
 
   std::pair<QPointF, QPointF>
+  legacyPointsC1C2() const;
+
+  std::pair<QPointF, QPointF>
   pointsC1C2() const;
 
   QPointF

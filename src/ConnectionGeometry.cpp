@@ -96,30 +96,71 @@ boundingRect() const
 
 std::pair<QPointF, QPointF>
 ConnectionGeometry::
+legacyPointsC1C2() const
+{
+	const double defaultOffset = 200;
+
+	double xDistance = _in.x() - _out.x();
+
+	double horizontalOffset = qMin(defaultOffset, std::abs(xDistance));
+
+	double verticalOffset = 0;
+
+	double ratioX = 0.5;
+
+	if (xDistance <= 0)
+	{
+		double yDistance = _in.y() - _out.y() + 20;
+
+		double vector = yDistance < 0 ? -1.0 : 1.0;
+
+		verticalOffset = qMin(defaultOffset, std::abs(yDistance)) * vector;
+
+		ratioX = 1.0;
+	}
+
+	horizontalOffset *= ratioX;
+
+	QPointF c1(_out.x() + horizontalOffset,
+		_out.y() + verticalOffset);
+
+	QPointF c2(_in.x() - horizontalOffset,
+		_in.y() - verticalOffset);
+
+	return std::make_pair(c1, c2);
+}
+
+std::pair<QPointF, QPointF>
+ConnectionGeometry::
 pointsC1C2() const
 {
+	auto const &nodeStyle = StyleCollection::nodeStyle();
+	if (nodeStyle.UseLegacyStyle) {
+		return legacyPointsC1C2();
+	}
+
   const double defaultOffset = 200;
 
-  double xDistance = _in.x() - _out.x();
+  double yDistance = _in.y() - _out.y();
 
-  double horizontalOffset = qMin(defaultOffset, std::abs(xDistance));
+  double verticalOffset = qMin(defaultOffset, std::abs(yDistance));
 
-  double verticalOffset = 0;
+  double horizontalOffset = 0;
 
-  double ratioX = 0.5;
+  double ratioY = 0.5;
 
-  if (xDistance <= 0)
+  if (yDistance <= 0)
   {
-    double yDistance = _in.y() - _out.y() + 20;
+    double xDistance = _in.x() - _out.x() + 20;
 
-    double vector = yDistance < 0 ? -1.0 : 1.0;
+    double vector = xDistance < 0 ? -1.0 : 1.0;
 
-    verticalOffset = qMin(defaultOffset, std::abs(yDistance)) * vector;
+    horizontalOffset = qMin(defaultOffset, std::abs(xDistance)) * vector;
 
-    ratioX = 1.0;
+    ratioY = 1.0;
   }
 
-  horizontalOffset *= ratioX;
+  verticalOffset *= ratioY;
 
   QPointF c1(_out.x() + horizontalOffset,
              _out.y() + verticalOffset);

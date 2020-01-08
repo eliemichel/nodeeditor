@@ -31,14 +31,14 @@ paint(QPainter* painter,
 
   NodeState const& state = node.nodeState();
 
-  NodeGraphicsObject const & graphicsObject = node.nodeGraphicsObject();
+  bool isSelected = node.nodeGraphicsObject().isSelected(); // this is kind of part of the state
 
   geom.recalculateSize(painter->font());
 
   //--------------------------------------------
   NodeDataModel const * model = node.nodeDataModel();
 
-  drawNodeRect(painter, geom, model, graphicsObject);
+  drawNodeRect(painter, geom, model, isSelected);
 
   drawConnectionPoints(painter, geom, state, model, scene);
 
@@ -50,7 +50,7 @@ paint(QPainter* painter,
 
   drawResizeRect(painter, geom, model);
 
-  drawValidationRect(painter, geom, model, graphicsObject);
+  drawValidationRect(painter, geom, model, isSelected);
 
   /// call custom painter
   if (auto painterDelegate = model->painterDelegate())
@@ -65,11 +65,11 @@ NodePainter::
 drawNodeRect(QPainter* painter,
              NodeGeometry const& geom,
              NodeDataModel const* model,
-             NodeGraphicsObject const & graphicsObject)
+             bool isSelected)
 {
   NodeStyle const& nodeStyle = model->nodeStyle();
 
-  auto color = graphicsObject.isSelected()
+  auto color = isSelected
                ? nodeStyle.SelectedBoundaryColor
                : nodeStyle.NormalBoundaryColor;
 
@@ -94,7 +94,7 @@ drawNodeRect(QPainter* painter,
 
   painter->setBrush(gradient);
 
-  float diam = nodeStyle.ConnectionPointDiameter;
+  float diam = nodeStyle.UseLegacyStyle ? nodeStyle.ConnectionPointDiameter : 0;
 
   QRectF boundary( -diam, -diam, 2.0 * diam + geom.width(), 2.0 * diam + geom.height());
 
@@ -256,12 +256,18 @@ drawModelName(QPainter * painter,
 
   auto rect = metrics.boundingRect(name);
 
-  QPointF position((geom.width() - rect.width()) / 2.0,
-                   (geom.spacing() + geom.entryHeight()) / 3.0);
-
   painter->setFont(f);
   painter->setPen(nodeStyle.FontColor);
-  painter->drawText(position, name);
+
+  if (nodeStyle.UseLegacyStyle) {
+	  QPointF position((geom.width() - rect.width()) / 2.0,
+		  (geom.spacing() + geom.entryHeight()) / 3.0);
+
+	  painter->drawText(position, name);
+  } else {
+	  QRect area = QRect(geom.width() + nodeStyle.NameLeftMargin, 0, rect.width(), geom.height());
+	  painter->drawText(area, Qt::AlignLeft | Qt::AlignVCenter, name);
+  }
 
   f.setBold(false);
   painter->setFont(f);
@@ -351,7 +357,7 @@ NodePainter::
 drawValidationRect(QPainter * painter,
                    NodeGeometry const & geom,
                    NodeDataModel const * model,
-                   NodeGraphicsObject const & graphicsObject)
+                   bool isSelected)
 {
   auto modelValidationState = model->validationState();
 
@@ -359,7 +365,7 @@ drawValidationRect(QPainter * painter,
   {
     NodeStyle const& nodeStyle = model->nodeStyle();
 
-    auto color = graphicsObject.isSelected()
+    auto color = isSelected
                  ? nodeStyle.SelectedBoundaryColor
                  : nodeStyle.NormalBoundaryColor;
 

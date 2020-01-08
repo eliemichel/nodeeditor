@@ -78,16 +78,51 @@ boundingRect() const
 
   double addon = 4 * nodeStyle.ConnectionPointDiameter;
 
+  double nameWidth = 0;
+  if (!nodeStyle.UseLegacyStyle) {
+	  const QString & name = _dataModel->caption();
+	  nameWidth = nodeStyle.NameLeftMargin + _fontMetrics.width(name);
+  }
+
   return QRectF(0 - addon,
                 0 - addon,
-                _width + 2 * addon,
+                _width + 2 * addon + nameWidth,
                 _height + 2 * addon);
+}
+
+
+QPainterPath
+NodeGeometry::
+shape() const
+{
+	QPainterPath path;
+	auto const &nodeStyle = StyleCollection::nodeStyle();
+
+	if (nodeStyle.UseLegacyStyle) {
+		path.addRect(boundingRect());
+		return path;
+	}
+
+	double addon = 4 * nodeStyle.ConnectionPointDiameter;
+
+	//double nameWidth = 0;
+	//const QString & name = _dataModel->caption();
+	//nameWidth = nodeStyle.NameLeftMargin + _fontMetrics.width(name);
+	
+	path.addRect(QRectF(
+		0 - addon,
+		0 - addon,
+		_width + 2 * addon,
+		_height + 2 * addon
+	));
+
+	return path;
 }
 
 
 void
 NodeGeometry::
-recalculateSize() const
+legacyRecalculateSize() const
 {
   _entryHeight = _fontMetrics.height();
 
@@ -128,6 +163,29 @@ recalculateSize() const
 
 void
 NodeGeometry::
+recalculateSize() const
+{
+	auto const &nodeStyle = StyleCollection::nodeStyle();
+	if (nodeStyle.UseLegacyStyle) {
+		legacyRecalculateSize();
+		return;
+	}
+
+	_entryHeight = _fontMetrics.height();
+	_width = 65;
+	_height = _width * 0.35;
+
+	if (auto w = _dataModel->embeddedWidget())
+	{
+		_height = std::max(_height, static_cast<unsigned>(w->height()));
+	}
+	_height += captionHeight();
+	_height += validationHeight();
+}
+
+
+void
+NodeGeometry::
 recalculateSize(QFont const & font) const
 {
   QFontMetrics fontMetrics(font);
@@ -149,48 +207,76 @@ recalculateSize(QFont const & font) const
 
 QPointF
 NodeGeometry::
+legacyPortScenePosition(PortIndex index,
+	PortType portType) const
+{
+	auto const &nodeStyle = StyleCollection::nodeStyle();
+
+	unsigned int step = _entryHeight + _spacing;
+
+	QPointF result;
+
+	double totalHeight = 0.0;
+
+	totalHeight += captionHeight() + _entryHeight / 2.0;
+
+	totalHeight += step * index;
+
+	switch (portType)
+	{
+	case PortType::Out:
+	{
+		double x = _width + nodeStyle.ConnectionPointDiameter;
+
+		result = QPointF(x, totalHeight);
+		break;
+	}
+
+	case PortType::In:
+	{
+		double x = 0.0 - nodeStyle.ConnectionPointDiameter;
+
+		result = QPointF(x, totalHeight);
+		break;
+	}
+
+	default:
+		break;
+	}
+
+	return result;
+}
+
+QPointF
+NodeGeometry::
 portScenePosition(PortIndex index,
-                  PortType portType,
-                  QTransform const & t) const
+                  PortType portType) const
 {
   auto const &nodeStyle = StyleCollection::nodeStyle();
 
-  unsigned int step = _entryHeight + _spacing;
+  if (nodeStyle.UseLegacyStyle) {
+	  return legacyPortScenePosition(index, portType);
+  }
+
+  float diam = nodeStyle.ConnectionPointDiameter;
+  int n = _dataModel->nPorts(portType);
+
+  float minSpacing = nodeStyle.ConnectionPointMinimumSpacing;
+  float margin = nodeStyle.ConnectionPointMargin;
+  float spacing = std::max((_width - n * diam) / (n + 1), minSpacing);
+  float totalWidth = spacing * (n + 1) + diam * n;
+
+  unsigned int step = spacing + diam;
 
   QPointF result;
 
-  double totalHeight = 0.0;
+  double x = spacing + diam / 2 - (totalWidth - _width) / 2;
+  x += step * index;
 
-  totalHeight += captionHeight();
+  double y = margin + diam / 2;
+  y = portType == PortType::In ? -y : _height + y;
 
-  totalHeight += step * index;
-
-  // TODO: why?
-  totalHeight += step / 2.0;
-
-  switch (portType)
-  {
-    case PortType::Out:
-    {
-      double x = _width + nodeStyle.ConnectionPointDiameter;
-
-      result = QPointF(x, totalHeight);
-      break;
-    }
-
-    case PortType::In:
-    {
-      double x = 0.0 - nodeStyle.ConnectionPointDiameter;
-
-      result = QPointF(x, totalHeight);
-      break;
-    }
-
-    default:
-      break;
-  }
-
-  return t.map(result);
+  return QPointF(x, y);
 }
 
 
@@ -213,7 +299,7 @@ checkHitScenePoint(PortType portType,
 
   for (unsigned int i = 0; i < nItems; ++i)
   {
-    auto pp = portScenePosition(i, portType, sceneTransform);
+    auto pp = sceneTransform.map(portScenePosition(i, portType));
 
     QPointF p = pp - scenePoint;
     auto    distance = std::sqrt(QPointF::dotProduct(p, p));
@@ -246,6 +332,10 @@ QPointF
 NodeGeometry::
 widgetPosition() const
 {
+  auto const &nodeStyle = StyleCollection::nodeStyle();
+  if (!nodeStyle.UseLegacyStyle) {
+	return QPointF(_width, 0);
+  }
   if (auto w = _dataModel->embeddedWidget())
   {
     if (w->sizePolicy().verticalPolicy() & QSizePolicy::ExpandFlag)
@@ -284,6 +374,11 @@ unsigned int
 NodeGeometry::
 captionHeight() const
 {
+  auto const &nodeStyle = StyleCollection::nodeStyle();
+  if (!nodeStyle.UseLegacyStyle) {
+    return 0;
+  }
+
   if (!_dataModel->captionVisible())
     return 0;
 

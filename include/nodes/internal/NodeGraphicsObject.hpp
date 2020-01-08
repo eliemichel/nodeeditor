@@ -38,6 +38,9 @@ public:
   QRectF
   boundingRect() const override;
 
+  QPainterPath
+  shape() const override;
+  
   void
   setGeometryChanged();
 

@@ -32,7 +32,7 @@ public:
   drawNodeRect(QPainter* painter,
                NodeGeometry const& geom,
                NodeDataModel const* model,
-               NodeGraphicsObject const & graphicsObject);
+               bool isSelected);
 
   static
   void
@@ -74,6 +74,6 @@ public:
   drawValidationRect(QPainter * painter,
                      NodeGeometry const & geom,
                      NodeDataModel const * model,
-                     NodeGraphicsObject const & graphicsObject);
+                     bool isSelected);
 };
 }
