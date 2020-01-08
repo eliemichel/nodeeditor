@@ -631,7 +631,7 @@ loadCopyFromMemory(const QByteArray& data)
 	QJsonArray nodesJsonArray = jsonDocument["nodes"].toArray();
 	for (QJsonValueRef node : nodesJsonArray)
 	{
-		QJsonObject & nodeJson = node.toObject();
+		QJsonObject nodeJson = node.toObject();
 
 		QString oldId = nodeJson["id"].toString();
 		if (!newIdsMap.contains(oldId))
@@ -645,7 +645,7 @@ loadCopyFromMemory(const QByteArray& data)
 	QJsonArray connectionJsonArray = jsonDocument["connections"].toArray();
 	for (QJsonValueRef connection : connectionJsonArray)
 	{
-		QJsonObject & connectionJson = connection.toObject();
+		QJsonObject connectionJson = connection.toObject();
 
 		QString oldId = connectionJson["in_id"].toString();
 		if (newIdsMap.contains(oldId))

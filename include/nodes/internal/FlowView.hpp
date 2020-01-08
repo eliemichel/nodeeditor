@@ -62,7 +62,7 @@ protected:
    * You will likely want to override it with your own type.
    * This defaults to 'application/x-nodeeditor-nodes'.
    */
-  virtual inline QString nodeMimeType();
+  virtual QString nodeMimeType();
 
 private:
   void copy();
