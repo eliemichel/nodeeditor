@@ -40,7 +40,7 @@ find_package(Qt5 5.3 COMPONENTS
              Gui
              OpenGL)
 
-qt5_add_resources(RESOURCES ./resources/resources.qrc)
+qt5_add_resources(RESOURCES ./resources/nodes.qrc)
 
 # Unfortunately, as we have a split include/src, AUTOMOC doesn't work.
 # We'll have to manually specify some files

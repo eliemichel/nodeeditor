@@ -363,7 +363,7 @@ FlowView::
 mouseMoveEvent(QMouseEvent *event)
 {
   QGraphicsView::mouseMoveEvent(event);
-  if (scene()->mouseGrabberItem() == nullptr && event->buttons() == Qt::LeftButton)
+  if (scene() && scene()->mouseGrabberItem() == nullptr && event->buttons() == Qt::LeftButton)
   {
     // Make sure shift is not being pressed
     if ((event->modifiers() & Qt::ShiftModifier) == 0)
@@ -431,7 +431,8 @@ void
 FlowView::
 showEvent(QShowEvent *event)
 {
-  _scene->setSceneRect(this->rect());
+  if (_scene)
+	_scene->setSceneRect(this->rect());
   QGraphicsView::showEvent(event);
 }
 
