@@ -8,6 +8,20 @@ using QtNodes::NodeDataModel;
 using QtNodes::NodeDataType;
 using QtNodes::TypeConverter;
 
+void
+DataModelRegistry::
+registerModel(QString const &name,
+              RegistryItemCreator creator,
+              QString const &category)
+{
+  if (_registeredItemCreators.count(name) == 0)
+  {
+    _registeredItemCreators[name] = std::move(creator);
+    _categories.insert(category);
+    _registeredModelsCategory[name] = category;
+  }
+}
+
 std::unique_ptr<NodeDataModel>
 DataModelRegistry::
 create(QString const &modelName)

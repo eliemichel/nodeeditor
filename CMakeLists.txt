@@ -98,9 +98,10 @@ target_link_libraries(nodes
 target_compile_definitions(nodes
   PUBLIC
     ${Qt5Widgets_DEFINITIONS}
-    NODE_EDITOR_SHARED
+    #NODE_EDITOR_SHARED
+	NODE_EDITOR_STATIC
   PRIVATE
-    NODE_EDITOR_EXPORTS
+    #NODE_EDITOR_EXPORTS
     #NODE_DEBUG_DRAWING
     QT_NO_KEYWORDS
 )

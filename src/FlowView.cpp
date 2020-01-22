@@ -458,9 +458,9 @@ copy()
   QClipboard *clipboard = QApplication::clipboard();
   QMimeData *mimeData = new QMimeData();
 
-  QByteArray data = scene()->saveToMemory(scene()->selectedNodes());
-  mimeData->setData(nodeMimeType(), data);
-  mimeData->setText(data);
+  QByteArray bytes = scene()->saveToMemory(scene()->selectedNodes());
+  mimeData->setData(nodeMimeType(), bytes);
+  mimeData->setText(bytes);
 
   clipboard->setMimeData(mimeData);
 }

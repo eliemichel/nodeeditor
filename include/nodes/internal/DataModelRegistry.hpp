@@ -51,6 +51,10 @@ public:
 
 public:
 
+  void registerModel(QString const &name,
+                     RegistryItemCreator creator,
+                     QString const &category = "Nodes");
+
   template<typename ModelType>
   void registerModel(RegistryItemCreator creator,
                      QString const &category = "Nodes")
@@ -62,13 +66,6 @@ public:
   void registerModel(QString const &category = "Nodes")
   {
     RegistryItemCreator creator = [](){ return std::make_unique<ModelType>(); };
-    registerModelImpl<ModelType>(std::move(creator), category);
-  }
-
-  template<typename ModelType>
-  void registerModel(QString const &category,
-                     RegistryItemCreator creator)
-  {
     registerModelImpl<ModelType>(std::move(creator), category);
   }
 
@@ -124,26 +121,14 @@ private:
   typename std::enable_if< HasStaticMethodName<ModelType>::value>::type
   registerModelImpl(RegistryItemCreator creator, QString const &category )
   {
-    const QString name = ModelType::Name();
-    if (_registeredItemCreators.count(name) == 0)
-    {
-      _registeredItemCreators[name] = std::move(creator);
-      _categories.insert(category);
-      _registeredModelsCategory[name] = category;
-    }
+    registerModel(ModelType::Name(), creator, category);
   }
 
   template<typename ModelType>
   typename std::enable_if< !HasStaticMethodName<ModelType>::value>::type
   registerModelImpl(RegistryItemCreator creator, QString const &category )
   {
-    const QString name = creator()->name();
-    if (_registeredItemCreators.count(name) == 0)
-    {
-      _registeredItemCreators[name] = std::move(creator);
-      _categories.insert(category);
-      _registeredModelsCategory[name] = category;
-    }
+    registerModel(creator()->name(), creator, category);
   }
 
 };
