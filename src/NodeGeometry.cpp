@@ -293,7 +293,7 @@ checkHitScenePoint(PortType portType,
   if (portType == PortType::None)
     return result;
 
-  double const tolerance = 2.0 * nodeStyle.ConnectionPointDiameter;
+  double const tolerance = nodeStyle.ConnectionPointToleranceFactor * nodeStyle.ConnectionPointDiameter;
 
   unsigned int const nItems = _dataModel->nPorts(portType);
 

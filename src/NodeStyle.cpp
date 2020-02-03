@@ -136,6 +136,7 @@ loadJsonFromByteArray(QByteArray const &byteArray)
 
   NODE_STYLE_READ_FLOAT(obj, PenWidth);
   NODE_STYLE_READ_FLOAT(obj, HoveredPenWidth);
+  NODE_STYLE_READ_FLOAT(obj, ConnectionPointToleranceFactor);
   NODE_STYLE_READ_FLOAT(obj, ConnectionPointDiameter);
   NODE_STYLE_READ_FLOAT(obj, ConnectionPointMinimumSpacing);
   NODE_STYLE_READ_FLOAT(obj, ConnectionPointMargin);

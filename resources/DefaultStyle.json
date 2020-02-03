@@ -22,6 +22,7 @@
     "PenWidth": 1.0,
     "HoveredPenWidth": 1.5,
 
+    "ConnectionPointToleranceFactor": 2.0,
     "ConnectionPointDiameter": 8.0,
     "ConnectionPointMinimumSpacing": 12.0,
     "ConnectionPointMargin": 3.0,

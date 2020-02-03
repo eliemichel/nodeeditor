@@ -49,6 +49,7 @@ public:
   float PenWidth;
   float HoveredPenWidth;
 
+  float ConnectionPointToleranceFactor;
   float ConnectionPointDiameter;
   float ConnectionPointMinimumSpacing;
   float ConnectionPointMargin;
