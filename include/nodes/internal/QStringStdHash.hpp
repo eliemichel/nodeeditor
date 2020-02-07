@@ -4,6 +4,9 @@
 
 #include <QtCore/QString>
 #include <QtCore/QVariant>
+#include <QtGlobal>
+
+#if QT_VERSION < 0x050e00
 
 namespace std
 {
@@ -17,3 +20,5 @@ struct hash<QString>
   }
 };
 }
+
+#endif // QT_VERSION
