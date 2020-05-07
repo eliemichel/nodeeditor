@@ -64,6 +64,9 @@ protected:
    */
   virtual QString nodeMimeType();
 
+  /// @param pos local event position
+  void openNodeCreationMenu(QPoint pos);
+
 private:
   void copy();
   void paste();

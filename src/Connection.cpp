@@ -29,6 +29,11 @@ using QtNodes::ConnectionGraphicsObject;
 using QtNodes::ConnectionGeometry;
 using QtNodes::TypeConverter;
 
+
+Connection::Policy
+Connection::
+s_policy = Connection::Policy::RequireVacantPort;
+
 Connection::
 Connection(PortType portType,
            Node& node,

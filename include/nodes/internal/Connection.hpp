@@ -32,6 +32,18 @@ class NODE_EDITOR_PUBLIC Connection
 
   Q_OBJECT
 
+
+public:
+    /// Policy regarding attempts to connect to a port where there is already a connection
+    enum class Policy {
+        RequireVacantPort,
+        OverrideExistingConnections,
+    };
+
+    static void SetPolicy(Policy policy) { s_policy = policy; }
+
+    static Policy GetPolicy() { return s_policy; }
+
 public:
 
   /// New Connection is attached to the port of the given Node.
@@ -136,6 +148,10 @@ Q_SIGNALS:
 
   void
   connectionMadeIncomplete(Connection const&) const;
+
+private:
+
+  static Policy s_policy;
 
 private:
 

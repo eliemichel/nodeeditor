@@ -97,7 +97,6 @@ FlowView::setScene(FlowScene *scene)
   addAction(_deleteSelectionAction);
 }
 
-
 void
 FlowView::
 contextMenuEvent(QContextMenuEvent *event)
@@ -108,119 +107,7 @@ contextMenuEvent(QContextMenuEvent *event)
     return;
   }
 
-  QMenu modelMenu;
-
-  auto skipText = QStringLiteral("skip me");
-
-  //Add filterbox to the context menu
-  auto *txtBox = new QLineEdit(&modelMenu);
-
-  txtBox->setPlaceholderText(QStringLiteral("Filter"));
-  txtBox->setClearButtonEnabled(true);
-
-  auto *txtBoxAction = new QWidgetAction(&modelMenu);
-  txtBoxAction->setDefaultWidget(txtBox);
-
-  modelMenu.addAction(txtBoxAction);
-
-  //Add result treeview to the context menu
-  auto *treeView = new QTreeWidget(&modelMenu);
-  treeView->header()->close();
-
-  auto *treeViewAction = new QWidgetAction(&modelMenu);
-  treeViewAction->setDefaultWidget(treeView);
-
-  modelMenu.addAction(treeViewAction);
-
-  QMap<QString, QTreeWidgetItem*> topLevelItems;
-  for (auto const &cat : _scene->registry().categories())
-  {
-	
-	auto item = new QTreeWidgetItem(treeView);
-	item->setText(0, cat);
-	item->setData(0, Qt::UserRole, skipText);
-	topLevelItems[cat] = item;
-  }
-
-  for (auto const &assoc : _scene->registry().registeredModelsCategoryAssociation())
-  {
-    auto parent = topLevelItems[assoc.second];
-    auto item   = new QTreeWidgetItem(parent);
-	const QStringList & parts = assoc.first.split("/");
-    item->setText(0, parts[parts.size() - 1]);
-    item->setData(0, Qt::UserRole, assoc.first);
-  }
-
-  treeView->expandAll();
-
-  auto onItemClicked = [&](QTreeWidgetItem *item, int)
-  {
-	  QString modelName = item->data(0, Qt::UserRole).toString();
-
-	  if (modelName == skipText)
-	  {
-		  return;
-	  }
-
-	  auto type = _scene->registry().create(modelName);
-
-	  if (type)
-	  {
-		  auto& node = _scene->createNode(std::move(type));
-
-		  QPoint pos = event->pos();
-
-		  QPointF posView = this->mapToScene(pos);
-
-		  node.nodeGraphicsObject().setPos(posView);
-
-		  _scene->nodePlaced(node);
-	  }
-	  else
-	  {
-		  qDebug() << "Model not found";
-	  }
-
-	  modelMenu.close();
-  };
-
-  connect(treeView, &QTreeWidget::itemClicked, onItemClicked);
-
-  //Setup filtering
-  connect(txtBox, &QLineEdit::textChanged, [&](const QString &text)
-  {
-	treeView->setCurrentIndex(QModelIndex());
-    for (auto& topLvlItem : topLevelItems)
-    {
-	  bool noMatch = true;
-      for (int i = 0; i < topLvlItem->childCount(); ++i)
-      {
-        auto child = topLvlItem->child(i);
-        auto modelName = child->data(0, Qt::UserRole).toString();
-		const QStringList & parts = modelName.split("/");
-		modelName = parts[parts.size() - 1];
-        const bool match = (modelName.contains(text, Qt::CaseInsensitive));
-        child->setHidden(!match);
-		noMatch = noMatch && !match;
-		if (match && !treeView->currentIndex().isValid()) {
-			treeView->setCurrentItem(child);
-		}
-      }
-	  topLvlItem->setHidden(noMatch);
-    }
-  });
-
-  connect(txtBox, &QLineEdit::returnPressed, [&]()
-  {
-	  if (treeView->currentIndex().isValid()) {
-		  onItemClicked(treeView->currentItem(), 0);
-	  }
-  });
-
-  // make sure the text box gets focus so the user doesn't have to click on it
-  txtBox->setFocus();
-
-  modelMenu.exec(event->globalPos());
+  openNodeCreationMenu(event->pos());
 }
 
 
@@ -449,6 +336,123 @@ FlowView::
 nodeMimeType()
 {
 	return "application/x-nodeeditor-nodes";
+}
+
+void
+FlowView::
+openNodeCreationMenu(QPoint pos)
+{
+    QMenu modelMenu;
+
+    auto skipText = QStringLiteral("skip me");
+
+    //Add filterbox to the context menu
+    auto* txtBox = new QLineEdit(&modelMenu);
+
+    txtBox->setPlaceholderText(QStringLiteral("Filter"));
+    txtBox->setClearButtonEnabled(true);
+
+    auto* txtBoxAction = new QWidgetAction(&modelMenu);
+    txtBoxAction->setDefaultWidget(txtBox);
+
+    modelMenu.addAction(txtBoxAction);
+
+    //Add result treeview to the context menu
+    auto* treeView = new QTreeWidget(&modelMenu);
+    treeView->header()->close();
+
+    auto* treeViewAction = new QWidgetAction(&modelMenu);
+    treeViewAction->setDefaultWidget(treeView);
+
+    modelMenu.addAction(treeViewAction);
+
+    QMap<QString, QTreeWidgetItem*> topLevelItems;
+    for (auto const& cat : _scene->registry().categories())
+    {
+
+        auto item = new QTreeWidgetItem(treeView);
+        item->setText(0, cat);
+        item->setData(0, Qt::UserRole, skipText);
+        topLevelItems[cat] = item;
+    }
+
+    for (auto const& assoc : _scene->registry().registeredModelsCategoryAssociation())
+    {
+        auto parent = topLevelItems[assoc.second];
+        auto item = new QTreeWidgetItem(parent);
+        const QStringList& parts = assoc.first.split("/");
+        item->setText(0, parts[parts.size() - 1]);
+        item->setData(0, Qt::UserRole, assoc.first);
+    }
+
+    treeView->expandAll();
+
+    auto onItemClicked = [&](QTreeWidgetItem* item, int)
+    {
+        QString modelName = item->data(0, Qt::UserRole).toString();
+
+        if (modelName == skipText)
+        {
+            return;
+        }
+
+        auto type = _scene->registry().create(modelName);
+
+        if (type)
+        {
+            auto& node = _scene->createNode(std::move(type));
+
+            QPointF posView = this->mapToScene(pos);
+
+            node.nodeGraphicsObject().setPos(posView);
+
+            _scene->nodePlaced(node);
+        }
+        else
+        {
+            qDebug() << "Model not found";
+        }
+
+        modelMenu.close();
+    };
+
+    connect(treeView, &QTreeWidget::itemClicked, onItemClicked);
+
+    //Setup filtering
+    connect(txtBox, &QLineEdit::textChanged, [&](const QString& text)
+        {
+            treeView->setCurrentIndex(QModelIndex());
+            for (auto& topLvlItem : topLevelItems)
+            {
+                bool noMatch = true;
+                for (int i = 0; i < topLvlItem->childCount(); ++i)
+                {
+                    auto child = topLvlItem->child(i);
+                    auto modelName = child->data(0, Qt::UserRole).toString();
+                    const QStringList& parts = modelName.split("/");
+                    modelName = parts[parts.size() - 1];
+                    const bool match = (modelName.contains(text, Qt::CaseInsensitive));
+                    child->setHidden(!match);
+                    noMatch = noMatch && !match;
+                    if (match && !treeView->currentIndex().isValid()) {
+                        treeView->setCurrentItem(child);
+                    }
+                }
+                topLvlItem->setHidden(noMatch);
+            }
+        });
+
+    connect(txtBox, &QLineEdit::returnPressed, [&]()
+        {
+            if (treeView->currentIndex().isValid()) {
+                onItemClicked(treeView->currentItem(), 0);
+            }
+        });
+
+    // make sure the text box gets focus so the user doesn't have to click on it
+    txtBox->setFocus();
+
+    modelMenu.exec(this->mapToGlobal(pos));
 }
 
 void

@@ -59,7 +59,7 @@ canConnect(PortIndex &portIndex, TypeConverter & converter) const
   // 3) Node port is vacant
 
   // port should be empty
-  if (!nodePortIsEmpty(requiredPort, portIndex))
+  if (Connection::GetPolicy() == Connection::Policy::RequireVacantPort && !nodePortIsEmpty(requiredPort, portIndex))
     return false;
 
   // 4) Connection type equals node port type, or there is a registered type conversion that can translate between the two
@@ -102,6 +102,20 @@ tryConnect() const
     return false;
   }
 
+  // 1.25) If there is a connection already (with policy OverrideExistingConnections)
+  //       then remove it
+  PortType requiredPort = connectionRequiredPort();
+  if (!nodePortIsEmpty(requiredPort, portIndex))
+  {
+      auto connections = _node->nodeState().connections(requiredPort, portIndex);
+      while (!connections.empty())
+      {
+          auto co = connections.begin()->second;
+          _scene->deleteConnection(*co);
+          connections = _node->nodeState().connections(requiredPort, portIndex);
+      }
+  }
+
   // 1.5) If the connection is possible but a type conversion is needed,
   //      assign a convertor to connection
   if (converter)
@@ -110,7 +124,6 @@ tryConnect() const
   }
 
   // 2) Assign node to required port in Connection
-  PortType requiredPort = connectionRequiredPort();
   _node->nodeState().setConnection(requiredPort,
                                    portIndex,
                                    *_connection);
