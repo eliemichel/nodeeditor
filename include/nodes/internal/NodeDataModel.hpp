@@ -59,6 +59,10 @@ public:
   virtual QString
   name() const = 0;
 
+  /// Name that is not unique but to recognize a type when data models are inherited
+  virtual QString
+  parentName() const { return ""; }
+
 public:
 
   QJsonObject
